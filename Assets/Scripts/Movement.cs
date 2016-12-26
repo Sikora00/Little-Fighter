@@ -12,6 +12,10 @@ public class Movement : MonoBehaviour
     Rigidbody2D rigidbody;
     private Animator anim;
     private SpriteRenderer mySpriteRenderer;
+    private Transform groundCheck;
+    [SerializeField]    private LayerMask whatIsGround; // A mask determining what is ground to the character
+    private float groundedRadius = 0.2f; // Radius of the overlap circle to determine if grounded
+    private bool grounded = false; // Whether or not the player is grounded.
 
     void Start()
     {
@@ -21,12 +25,19 @@ public class Movement : MonoBehaviour
         rigidbody = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
         mySpriteRenderer = GetComponent<SpriteRenderer>();
+        groundCheck = transform.Find("GroundCheck");
     }
 
+    void FixedUpdate()
+    {
+        grounded = Physics2D.OverlapCircle(groundCheck.position, groundedRadius, whatIsGround);
+    }
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        
+
+        if (Input.GetKeyDown(KeyCode.Space) && grounded)
         {
             rigidbody.velocity = new Vector2(0, 0);
             rigidbody.AddForce(new Vector2(0, Force));
@@ -45,7 +56,7 @@ public class Movement : MonoBehaviour
             playerPosition.x = (Mathf.Clamp(transform.position.x, Preferences.LeftBorder,
                 Preferences.RightBorder));
             transform.position = playerPosition;
-            anim.Play("Run");
+            if(grounded) anim.Play("Run");
         }
     }
 }
